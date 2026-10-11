@@ -15,6 +15,6 @@ Este proyecto surge como solución a la falta de trazabilidad en la asignación 
 ## Stack Tecnológico
 
 - **Backend:** Node.js, Express.js
-- **Base de Datos:** MongoDB / PostgreSQL (Por definir)
+- **Base de Datos:** OracleDB
 - **Frontend:** HTML5, CSS3, JavaScript (React.js en fase posterior)
 - **Control de Versiones:** Git & GitHub
