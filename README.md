@@ -1,4 +1,4 @@
-# Sistema de Gestión de de Servicio Técnico TI (TechService)
+# Sistema de Gestión de Servicio Técnico TI (TechService)
 
 Plataforma web para el control de inventario, trazabilidad de activos tecnológicos y gestión de solicitudes de mantenimiento en entornos corporativos.
 
