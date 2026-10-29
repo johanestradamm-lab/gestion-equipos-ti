@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Servicio Técnico TI</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Iconos de Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <!-- Estilos Personalizados -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+
+
+      
+<!-- Menú Lateral / Sidebar -->
+      <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3">
+        <h4 class="text-center my-3 fw-bold text-white"><i class="bi bi-tools text-primary"></i> TechService</h4> 
+        <hr class="text-secondary">
+        <ul class="nav nav-pills flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" id="btnTabDashboard" onclick="cambiarSeccion('dashboard')"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="btnTabOrdenes" onclick="cambiarSeccion('ordenes')"><i class="bi bi-clipboard-check me-2"></i> Órdenes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="btnTabClientes" onclick="cambiarSeccion('clientes')"><i class="bi bi-people me-2"></i> Clientes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="btnTabEquipos" onclick="cambiarSeccion('equipos')"><i class="bi bi-laptop me-2"></i> Equipos</a>
+          </li>
+
+          <!-- SWITCH DE TEMA MINIMALISTA -->
+          <li class="nav-item mt-4 pt-3 border-top border-secondary text-center">
+            <button class="btn btn-sm btn-link text-decoration-none p-2 rounded-circle" id="btnToggleTheme" onclick="alternarTema()" title="Cambiar Tema">
+              <i class="bi bi-moon-stars-fill text-white-50 fs-5" id="themeIcon"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Contenido Principal -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+
+        <!-- BARRA DE BÚSQUEDA GLOBAL / EN TIEMPO REAL -->
+        <div class="row mb-3">
+          <div class="col-md-6 col-lg-4 ms-auto">
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0">
+                <i class="bi bi-search text-muted"></i>
+              </span>
+              <input 
+                type="text" 
+                id="inputBuscador" 
+                class="form-control border-start-0" 
+                placeholder="Buscar por cliente, ID, equipo o estado..."
+                oninput="filtrarTablaEnTiempoReal()"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 0: DASHBOARD (SIN d-none para que cargue visible) -->
+        <div id="seccionDashboard">
+          <div class="pb-2 mb-4 border-bottom">
+            <h2 class="fw-bold">Panel de Control</h2>
+          </div>
+
+          <!-- Tarjetas de Métricas -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-3">
+              <div class="card border-0 shadow-sm border-start border-4 border-primary">
+                <div class="card-body">
+                  <div class="text-muted small fw-bold text-uppercase">Órdenes Activas</div>
+                  <div class="h3 fw-bold my-1 text-primary" id="dashOrdenesActivas">0</div>
+                  <div class="small text-muted">En revisión / reparación</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0 shadow-sm border-start border-4 border-success">
+                <div class="card-body">
+                  <div class="text-muted small fw-bold text-uppercase">Listas p/ Entrega</div>
+                  <div class="h3 fw-bold my-1 text-success" id="dashOrdenesListas">0</div>
+                  <div class="small text-muted">Reparadas sin entregar</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0 shadow-sm border-start border-4 border-info">
+                <div class="card-body">
+                  <div class="text-muted small fw-bold text-uppercase">Total Clientes</div>
+                  <div class="h3 fw-bold my-1 text-info" id="dashTotalClientes">0</div>
+                  <div class="small text-muted">Registrados en sistema</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0 shadow-sm border-start border-4 border-warning">
+                <div class="card-body">
+                  <div class="text-muted small fw-bold text-uppercase">Recaudo Estimado</div>
+                  <div class="h3 fw-bold my-1 text-warning" id="dashRecaudoTotal">$0</div>
+                  <div class="small text-muted">Órdenes completadas</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen de Actividad Reciente -->
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+              <h5 class="mb-0 fw-bold">Últimas Órdenes Registradas</h5>
+              <button class="btn btn-sm btn-outline-primary" onclick="cambiarSeccion('ordenes')">Ver Todas</button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>N° Orden</th>
+                      <th>Cliente</th>
+                      <th>Equipo</th>
+                      <th>Estado</th>
+                      <th>Costo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaDashboardRecientes"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 1: ÓRDENES DE SERVICIO -->
+        <div id="seccionOrdenes" class="d-none">
+          <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2 fw-bold">Órdenes de Servicio</h1>
+            <button class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalNuevaOrden" onclick="cargarEquiposEnSelect()">
+              <i class="bi bi-plus-circle me-1"></i> Nueva Orden
+            </button>
+          </div>
+
+          <!-- Cards de Resumen -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <div class="card p-3 border-start border-warning border-4">
+                <span class="text-muted small">Total Órdenes Registradas</span>
+                <h3 class="fw-bold mb-0 text-warning" id="countTotalOrdenes">0</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla de Órdenes -->
+          <div class="card p-3">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>N° Orden</th>
+                    <th>Cliente</th>
+                    <th>Equipo</th>
+                    <th>Falla Reportada</th>
+                    <th>Estado</th>
+                    <th>Costo Total</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaOrdenes"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: CLIENTES -->
+        <div id="seccionClientes" class="d-none">
+          <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2 fw-bold">Gestión de Clientes</h1>
+            <button class="btn btn-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoCliente">
+              <i class="bi bi-person-plus me-1"></i> Nuevo Cliente
+            </button>
+          </div>
+          <div class="card p-3">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Dirección</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaClientes"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: EQUIPOS -->
+        <div id="seccionEquipos" class="d-none">
+          <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2 fw-bold">Gestión de Equipos</h1>
+            <button class="btn btn-info text-white rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoEquipo" onclick="cargarClientesEnSelect()">
+              <i class="bi bi-laptop me-1"></i> Registrar Equipo
+            </button>
+          </div>
+          <div class="card p-3">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Tipo</th>
+                    <th>Marca / Modelo</th>
+                    <th>N° Serie</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaEquipos"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+  <!-- MODAL: NUEVA ORDEN -->
+  <div class="modal fade" id="modalNuevaOrden" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Crear Órden de Servicio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="formNuevaOrden">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Seleccionar Equipo</label>
+              <select class="form-select" id="selectEquipo" required></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Falla Reportada</label>
+              <textarea class="form-control" id="fallaReportada" rows="3" required placeholder="Describa la falla del equipo..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Guardar Órden</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ACTUALIZAR ORDEN -->
+  <div class="modal fade" id="modalEditarOrden" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Actualizar Órden N° <span id="lblIdOrden"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="formEditarOrden">
+          <input type="hidden" id="editOrdenId">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Estado de la Orden</label>
+              <select class="form-select" id="editEstado">
+                <option value="INGRESADO">INGRESADO</option>
+                <option value="EN REPARACION">EN REPARACION</option>
+                <option value="REPARADO">REPARADO</option>
+                <option value="ENTREGADO">ENTREGADO</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Diagnóstico Técnico</label>
+              <textarea class="form-control" id="editDiagnostico" rows="3" placeholder="Diagnóstico o solución aplicada..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Costo Total ($)</label>
+              <input type="number" class="form-control" id="editCosto" placeholder="Ej: 150000">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO CLIENTE -->
+  <div class="modal fade" id="modalNuevoCliente" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Registrar Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="formNuevoCliente">
+          <div class="modal-body">
+            <div class="mb-3"><label class="form-label">Nombre Completo</label><input type="text" class="form-control" id="clienteNombre" required></div>
+            <div class="mb-3"><label class="form-label">Teléfono</label><input type="text" class="form-control" id="clienteTelefono"></div>
+            <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="clienteEmail"></div>
+            <div class="mb-3"><label class="form-label">Dirección</label><input type="text" class="form-control" id="clienteDireccion" placeholder="Ej: Calle 10 # 4-20"></div>
+          </div>
+          <div class="modal-footer"><button type="submit" class="btn btn-success">Guardar Cliente</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Cliente -->
+  <div class="modal fade" id="modalEditarCliente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formEditarCliente">
+            <input type="hidden" id="editClienteId">
+            <div class="mb-3">
+              <label class="form-label">Nombre Completo</label>
+              <input type="text" class="form-control" id="editClienteNombre" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Teléfono</label>
+              <input type="text" class="form-control" id="editClienteTelefono">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Correo Electrónico</label>
+              <input type="email" class="form-control" id="editClienteEmail">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Dirección</label>
+              <input type="text" class="form-control" id="editClienteDireccion">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO EQUIPO -->
+  <div class="modal fade" id="modalNuevoEquipo" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Registrar Equipo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="formNuevoEquipo">
+          <div class="modal-body">
+            <div class="mb-3"><label class="form-label">Cliente Dueño</label><select class="form-select" id="selectClienteEquipo" required></select></div>
+            <div class="mb-3"><label class="form-label">Tipo de Equipo</label><input type="text" class="form-control" id="equipoTipo" placeholder="Ej: Laptop, Impresora..." required></div>
+            <div class="mb-3"><label class="form-label">Marca</label><input type="text" class="form-control" id="equipoMarca" required></div>
+            <div class="mb-3"><label class="form-label">Modelo</label><input type="text" class="form-control" id="equipoModelo"></div>
+            <div class="mb-3"><label class="form-label">Número de Serie</label><input type="text" class="form-control" id="equipoSerie"></div>
+          </div>
+          <div class="modal-footer"><button type="submit" class="btn btn-info text-white">Guardar Equipo</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
+  <!-- Modal Editar Equipo -->
+  <div class="modal fade" id="modalEditarEquipo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Equipo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formEditarEquipo">
+            <input type="hidden" id="editEquipoId">
+            <div class="mb-3">
+              <label class="form-label">Cliente</label>
+              <select class="form-select" id="editEquipoClienteId" required></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tipo de Equipo</label>
+              <input type="text" class="form-control" id="editEquipoTipo" required placeholder="Ej: Laptop, PC, Impresora">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Marca</label>
+              <input type="text" class="form-control" id="editEquipoMarca" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Modelo</label>
+              <input type="text" class="form-control" id="editEquipoModelo">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Número de Serie</label>
+              <input type="text" class="form-control" id="editEquipoNumeroSerie">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
