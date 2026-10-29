@@ -1,4 +1,4 @@
-# Sistema de Gestión de Equipos e Insumos TI
+# Sistema de Gestión de de Servicio Técnico TI (TechService)
 
 Plataforma web para el control de inventario, trazabilidad de activos tecnológicos y gestión de solicitudes de mantenimiento en entornos corporativos.
 
