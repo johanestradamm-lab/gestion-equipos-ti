@@ -4,7 +4,7 @@ Plataforma web para la gestión integral, trazabilidad de órdenes de reparació
 
 ## Descripción General
 
-**TechService** surge como una solución tecnológica centralizada para laboratorios y talleres de servicio técnico en TI. Permite controlar el flujo completo de reparación de equipos (recibidos, en revisión, reparados, entregados y anulados), gestionar la información de clientes y visualizar métricas financieras y operativas clave en tiempo real a través de un panel de control interactivo.
+**TechService** es una solución web centralizada diseñada para centros de servicio técnico, talleres de reparación de tecnología y departamentos de soporte TI. Permite controlar el flujo completo de atención de equipos (recibidos, en revisión, reparados, entregados y anulados), gestionar la base de datos de clientes y monitorear métricas clave en tiempo real a través de un panel de control interactivo.
 
 ## Funcionalidades Principales
 
