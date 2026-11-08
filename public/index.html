@@ -17,9 +17,7 @@
   <div class="container-fluid">
     <div class="row">
 
-
-      
-<!-- Menú Lateral / Sidebar -->
+      <!-- Menú Lateral / Sidebar -->
       <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3">
         <h4 class="text-center my-3 fw-bold text-white"><i class="bi bi-tools text-primary"></i> TechService</h4> 
         <hr class="text-secondary">
@@ -67,10 +65,22 @@
           </div>
         </div>
 
-        <!-- SECCIÓN 0: DASHBOARD (SIN d-none para que cargue visible) -->
+        <!-- SECCIÓN 0: DASHBOARD -->
         <div id="seccionDashboard">
-          <div class="pb-2 mb-4 border-bottom">
-            <h2 class="fw-bold">Panel de Control</h2>
+          
+          <!-- Encabezado del Dashboard con Selector de Filtro -->
+          <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom">
+            <h2 class="fw-bold mb-0">Panel de Control</h2>
+            
+            <div class="d-flex align-items-center gap-2">
+              <label for="filtroTiempo" class="text-muted small mb-0">Periodo:</label>
+              <select id="filtroTiempo" class="form-select form-select-sm" style="width: auto;" onchange="cargarDashboard()">
+                <option value="todos">Todos los tiempos</option>
+                <option value="hoy">Hoy</option>
+                <option value="mes">Este Mes</option>
+                <option value="anio">Este Año</option>
+              </select>
+            </div>
           </div>
 
           <!-- Tarjetas de Métricas -->
@@ -233,27 +243,38 @@
         </div>
 
       </main>
+    </div>
+  </div>
 
   <!-- MODAL: NUEVA ORDEN -->
-  <div class="modal fade" id="modalNuevaOrden" tabindex="-1">
+  <div class="modal fade" id="modalNuevaOrden" tabindex="-1" aria-labelledby="lblNuevaOrden" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
+      <div class="modal-content shadow">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold">Crear Órden de Servicio</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title" id="lblNuevaOrden">Crear Órden de Servicio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form id="formNuevaOrden">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Seleccionar Equipo</label>
-              <select class="form-select" id="selectEquipo" required></select>
+              <label for="selectEquipo" class="form-label fw-bold">Equipo / Cliente</label>
+              <select class="form-select" id="selectEquipo" required>
+                <option value="" selected disabled>Cargando equipos...</option>
+              </select>
             </div>
+
             <div class="mb-3">
-              <label class="form-label">Falla Reportada</label>
-              <textarea class="form-control" id="fallaReportada" rows="3" required placeholder="Describa la falla del equipo..."></textarea>
+              <label for="nuevaOrdenCosto" class="form-label fw-bold">Costo / Presupuesto Inicial ($)</label>
+              <input type="number" class="form-control" id="nuevaOrdenCosto" placeholder="0 (opcional)" min="0">
+            </div>
+
+            <div class="mb-3">
+              <label for="fallaReportada" class="form-label fw-bold">Falla Reportada</label>
+              <textarea class="form-control" id="fallaReportada" rows="3" placeholder="Describa la falla del equipo..." required></textarea>
             </div>
           </div>
           <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
             <button type="submit" class="btn btn-primary">Guardar Órden</button>
           </div>
         </form>
@@ -261,37 +282,52 @@
     </div>
   </div>
 
-  <!-- MODAL: ACTUALIZAR ORDEN -->
-  <div class="modal fade" id="modalEditarOrden" tabindex="-1">
+  <!-- MODAL: EDITAR ORDEN -->
+  <div class="modal fade" id="modalEditarOrden" tabindex="-1" aria-labelledby="lblEditarOrden" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
+      <div class="modal-content shadow">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold">Actualizar Órden N° <span id="lblIdOrden"></span></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title" id="lblEditarOrden">Editar Orden #<span id="lblIdOrden"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form id="formEditarOrden">
-          <input type="hidden" id="editOrdenId">
           <div class="modal-body">
+            <input type="hidden" id="editOrdenId">
+
             <div class="mb-3">
-              <label class="form-label">Estado de la Orden</label>
-              <select class="form-select" id="editEstado">
-                <option value="INGRESADO">INGRESADO</option>
+              <label for="editEstado" class="form-label">Estado de la Orden</label>
+              <select class="form-select" id="editEstado" required>
+                <option value="PENDIENTE">PENDIENTE</option>
                 <option value="EN REPARACION">EN REPARACION</option>
                 <option value="REPARADO">REPARADO</option>
                 <option value="ENTREGADO">ENTREGADO</option>
+                <option value="ANULADO">ANULADO</option>
               </select>
             </div>
+
             <div class="mb-3">
-              <label class="form-label">Diagnóstico Técnico</label>
-              <textarea class="form-control" id="editDiagnostico" rows="3" placeholder="Diagnóstico o solución aplicada..."></textarea>
+              <label for="editFallaReportada" class="form-label">Falla Reportada</label>
+              <textarea class="form-control" id="editFallaReportada" rows="2" required></textarea>
             </div>
+
             <div class="mb-3">
-              <label class="form-label">Costo Total ($)</label>
-              <input type="number" class="form-control" id="editCosto" placeholder="Ej: 150000">
+              <label for="editDiagnostico" class="form-label">Diagnóstico y Notas de Servicio</label>
+              <textarea class="form-control" id="editDiagnostico" rows="3" placeholder="Ingrese diagnóstico o comentarios de avance..."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="editHistorial" class="form-label">Historial y Trazabilidad del Caso</label>
+              <textarea class="form-control" id="editHistorial" rows="3" placeholder="Bitácora de avances o registro de cambios de estado..."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="editCosto" class="form-label">Costo Total ($)</label>
+              <input type="number" class="form-control" id="editCosto" placeholder="0" min="0">
             </div>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="btn btn-success">Guardar Cambios</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
           </div>
         </form>
       </div>
@@ -319,7 +355,7 @@
     </div>
   </div>
 
-  <!-- Modal Editar Cliente -->
+  <!-- MODAL: EDITAR CLIENTE -->
   <div class="modal fade" id="modalEditarCliente" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -375,12 +411,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
-
-  <!-- Modal Editar Equipo -->
+  <!-- MODAL: EDITAR EQUIPO -->
   <div class="modal fade" id="modalEditarEquipo" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -417,3 +448,112 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL: CONFIRMAR ANULACIÓN -->
+  <div class="modal fade" id="modalConfirmarAnular" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Anulación
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3">
+          <p class="mb-0" id="mensajeConfirmarAnular">¿Estás seguro de que deseas anular esta orden?</p>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="btnConfirmarAnular">Sí, Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALLE / FICHA TÉCNICA -->
+  <div class="modal fade" id="modalDetalleOrden" tabindex="-1" aria-labelledby="lblDetalleOrden" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="lblDetalleOrden">
+            <i class="bi bi-file-earmark-text me-2"></i>Ficha Técnica - Orden #<span id="detOrdenId"></span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="areaImpresionOrden">
+          
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+            <div>
+              <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-tools me-2"></i>TechService TI</h4>
+              <small class="text-muted">Gestión de Servicio Técnico & Mantenimiento</small>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-secondary fs-6" id="detEstadoBadge">PENDIENTE</span>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <div class="card h-100 border-0 bg-body-tertiary p-3">
+                <h6 class="fw-bold text-muted mb-2"><i class="bi bi-person me-1"></i> Datos del Cliente</h6>
+                <div class="fw-bold fs-5" id="detClienteNombre">-</div>
+                <div class="small text-muted mb-1"><i class="bi bi-telephone me-1"></i><span id="detClienteTelefono">-</span></div>
+                <div class="small text-muted"><i class="bi bi-envelope me-1"></i><span id="detClienteEmail">-</span></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100 border-0 bg-body-tertiary p-3">
+                <h6 class="fw-bold text-muted mb-2"><i class="bi bi-laptop me-1"></i> Detalles del Equipo</h6>
+                <div class="fw-bold fs-5" id="detEquipoInfo">-</div>
+                <div class="small text-muted mb-1">Nº Serie: <code id="detEquipoSerie">-</code></div>
+                <div class="small text-muted">ID Equipo: #<span id="detEquipoId">-</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="fw-bold text-muted small">FALLA REPORTADA POR EL CLIENTE</label>
+            <div class="p-3 rounded border bg-body" id="detFallaReportada">-</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="fw-bold text-muted small">DIAGNÓSTICO TÉCNICO Y NOTAS DE REPARACIÓN</label>
+            <div class="p-3 rounded border bg-body" id="detDiagnostico">-</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="fw-bold text-muted small">HISTORIAL Y TRAZABILIDAD</label>
+            <div class="p-3 rounded border bg-body" id="detHistorial">-</div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center p-3 rounded bg-primary-subtle text-primary-emphasis">
+            <span class="fw-bold">Costo Total del Servicio:</span>
+            <span class="fs-4 fw-bold" id="detCostoTotal">$0</span>
+          </div>
+
+        </div>
+        <div class="modal-footer bg-body-tertiary">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="btn btn-success me-1" class="btn btn-success me-1" onclick="imprimirOrden()">
+            <i class="bi bi-printer me-1"></i> Imprimir Ficha
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICACIONES TOAST -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+    <div id="liveToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastMensaje"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS DE LA APLICACIÓN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

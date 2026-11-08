@@ -156,3 +156,63 @@ html, body {
   box-shadow: none;
   border-color: #0d6efd !important;
 }
+
+/* Estilo adaptativo para filas desactivadas / anuladas */
+tr.orden-anulada {
+  background-color: var(--bs-tertiary-bg) !important;
+  color: var(--bs-secondary-color) !important;
+  opacity: 0.75;
+}
+
+/* Opcional: Atenuar las celdas dentro de la fila anulada */
+tr.orden-anulada td {
+  color: inherit !important;
+}
+
+/* Indicador visual de filas clickeables */
+#tablaDashboardRecientes tbody tr,
+#tablaOrdenes tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+#tablaDashboardRecientes tbody tr:hover,
+#tablaOrdenes tbody tr:hover {
+  background-color: rgba(var(--bs-primary-rgb), 0.08) !important;
+}
+
+/* Reglas de Impresión Directa */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #modalDetalleOrden, 
+  #modalDetalleOrden * {
+    visibility: visible !important;
+  }
+  #modalDetalleOrden {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #modalDetalleOrden .modal-footer,
+  #modalDetalleOrden .btn-close {
+    display: none !important;
+  }
+  #modalDetalleOrden .modal-content {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Truncar texto largo en selectores y opciones */
+.form-select, 
+.form-select option {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}

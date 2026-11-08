@@ -1,6 +1,6 @@
 const { obtenerConexion, oracledb } = require('../db');
 
-// 1. Obtener todas las órdenes
+// 1. Obtener todas las órdenes (incluye o.historial)
 const obtenerOrdenes = async (req, res) => {
   let conexion;
   try {
@@ -8,7 +8,7 @@ const obtenerOrdenes = async (req, res) => {
     const sql = `
       SELECT o.id, o.equipo_id, e.tipo AS equipo_tipo, e.marca AS equipo_marca,
              c.nombre AS cliente_nombre, o.falla_reportada, o.diagnostico, 
-             o.estado, o.costo_total, TO_CHAR(o.fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso
+             o.estado, o.costo_total, o.historial, TO_CHAR(o.fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso
       FROM ordenes_servicio o
       JOIN equipos e ON o.equipo_id = e.id
       JOIN clientes c ON e.cliente_id = c.id
@@ -23,19 +23,21 @@ const obtenerOrdenes = async (req, res) => {
   }
 };
 
-// 2. Crear una nueva orden
+// 2. Crear una nueva orden (incluye costo inicial opcional)
 const crearOrden = async (req, res) => {
   let conexion;
   try {
     conexion = await obtenerConexion();
-    const { equipo_id, falla_reportada } = req.body;
+    const { equipo_id, falla_reportada, costo, costo_total } = req.body;
 
     if (!equipo_id || !falla_reportada) {
       return res.status(400).json({ error: 'equipo_id y falla_reportada son obligatorios' });
     }
 
-    const sql = `INSERT INTO ordenes_servicio (equipo_id, falla_reportada) 
-                 VALUES (:equipo_id, :falla_reportada) 
+    const valorCosto = parseFloat(costo_total ?? costo) || 0;
+
+    const sql = `INSERT INTO ordenes_servicio (equipo_id, falla_reportada, costo_total) 
+                 VALUES (:equipo_id, :falla_reportada, :costo_total) 
                  RETURNING id INTO :id`;
 
     const resultado = await conexion.execute(
@@ -43,13 +45,14 @@ const crearOrden = async (req, res) => {
       {
         equipo_id,
         falla_reportada,
+        costo_total: valorCosto,
         id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       },
       { autoCommit: true }
     );
 
     const nuevoId = resultado.outBinds.id[0];
-    res.status(201).json({ id: nuevoId, equipo_id, falla_reportada, estado: 'INGRESADO' });
+    res.status(201).json({ id: nuevoId, equipo_id, falla_reportada, costo_total: valorCosto, estado: 'INGRESADO' });
   } catch (error) {
     res.status(500).json({ error: 'Error al crear la orden de servicio', detalle: error.message });
   } finally {
@@ -57,26 +60,43 @@ const crearOrden = async (req, res) => {
   }
 };
 
-// 3. Actualizar diagnóstico, estado y costo de la orden
+// 3. Actualizar orden (incluye historial/trazabilidad)
 const actualizarOrden = async (req, res) => {
   let conexion;
   try {
     conexion = await obtenerConexion();
     const idBuscado = parseInt(req.params.id);
-    const { diagnostico, estado, costo_total } = req.body;
+    
+    const { 
+      diagnostico, DIAGNOSTICO, 
+      estado, ESTADO, 
+      costo_total, costo, COSTO_TOTAL,
+      falla_reportada, FALLA_REPORTADA, falla,
+      historial, HISTORIAL
+    } = req.body;
+
+    const fallaFinal = falla_reportada || FALLA_REPORTADA || falla || null;
+    const diagnosticoFinal = diagnostico || DIAGNOSTICO || null;
+    const estadoFinal = estado || ESTADO || null;
+    const costoFinal = costo_total ?? costo ?? COSTO_TOTAL ?? null;
+    const historialFinal = historial || HISTORIAL || null;
 
     const sql = `UPDATE ordenes_servicio 
-                 SET diagnostico = NVL(:diagnostico, diagnostico),
+                 SET falla_reportada = NVL(:falla_reportada, falla_reportada),
+                     diagnostico = NVL(:diagnostico, diagnostico),
                      estado = NVL(:estado, estado),
-                     costo_total = NVL(:costo_total, costo_total)
+                     costo_total = NVL(:costo_total, costo_total),
+                     historial = NVL(:historial, historial)
                  WHERE id = :id`;
 
     const resultado = await conexion.execute(
       sql,
       {
-        diagnostico: diagnostico || null,
-        estado: estado || null,
-        costo_total: costo_total || null,
+        falla_reportada: fallaFinal,
+        diagnostico: diagnosticoFinal,
+        estado: estadoFinal,
+        costo_total: costoFinal,
+        historial: historialFinal,
         id: idBuscado
       },
       { autoCommit: true }
